@@ -2,7 +2,7 @@ import { EachMessagePayload, Kafka } from 'kafkajs';
 
 const kafka = new Kafka({
   clientId: 'app',
-  brokers: ['localhost:9092'],
+  brokers: ['kafka:9092'],
 });
 
 export const consumer = kafka.consumer({ groupId: 'test-group' });

@@ -1,7 +1,7 @@
 import express from 'express';
-// import { startConsumer } from './kafka/consumer.js';
-// import { sendMessage } from './kafka/producer.js';
-// import { createTopics } from './kafka/topic.js';
+import { startConsumer } from './kafka/consumer.js';
+import { createTopics } from './kafka/topic.js';
+import produceRoute from './routes/order.route.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,16 +12,11 @@ app.get('/', (_req, res) => {
   res.send('Kafka microservice running!');
 });
 
-// app.post('/produce', async (_req, res) => {
-//   // await sendMessage('test-topic', [
-//     { value: 'Message from /produce endpoint' },
-//   ]);
-//   res.send('Message sent!');
-// });
-
 const bootstrap = async () => {
-  // await createTopics(['test-topic']);
-  // await startConsumer('test-topic');
+  await createTopics(['test-topic']);
+  await startConsumer('test-topic');
+
+  app.use('/', produceRoute);
 
   app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
