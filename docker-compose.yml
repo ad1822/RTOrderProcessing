@@ -24,7 +24,7 @@ services:
     depends_on:
       - kafka
     command: |
-      kafka-console-consumer.sh \
+      ./kafka-console-consumer.sh \
         --topic order.created.v1 \
         --bootstrap-server kafka:9092 \
         --from-beginning
