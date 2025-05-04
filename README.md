@@ -46,5 +46,4 @@ graph TD
   InventoryService --> InventoryDB
   PaymentService --> PaymentDB
 
-
 ```

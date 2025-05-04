@@ -29,10 +29,33 @@ services:
         --bootstrap-server kafka:9092 \
         --from-beginning
 
-  inventory-service:
+  order-service:
     build: ./1-order-service/
-    container_name: order-service
+    container_name: order
+    environment:
+      DB_HOST: order-db
+      DB_USER: orderuser
+      DB_PASS: orderpass
+      DB_NAME: orders
+      DB_PORT: 5432
+      PORT: 3000
     ports:
       - '3000:3000'
     depends_on:
+      - order-db
       - kafka
+
+  order-db:
+    image: postgres:14
+    container_name: order-database
+    environment:
+      POSTGRES_USER: orderuser
+      POSTGRES_PASSWORD: orderpass
+      POSTGRES_DB: orders
+    ports:
+      - '5432:5432'
+    volumes:
+      - order_db_data:/var/lib/postgresql/data
+
+volumes:
+  order_db_data:

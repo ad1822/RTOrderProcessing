@@ -3,6 +3,7 @@ import { sendMessage } from '../kafka/producer.js';
 
 interface data {
   userId: string;
+  itemId: number;
   orderId: number;
   orderAmount: number;
   status: string | 'Pending';
@@ -14,7 +15,13 @@ export const createOrder = async (
 ): Promise<void> => {
   const data: data = req.body;
 
-  if (!data.userId || !data.orderId || !data.orderAmount || !data.status) {
+  if (
+    !data.userId ||
+    !data.orderId ||
+    !data.itemId ||
+    !data.orderAmount ||
+    !data.status
+  ) {
     res.status(400).send('Missing required fields');
     return;
   }
