@@ -30,8 +30,8 @@ services:
         --from-beginning
 
   inventory-service:
-    build: ./inventory-service/
-    container_name: inventory
+    build: ./1-order-service/
+    container_name: order-service
     ports:
       - '3000:3000'
     depends_on:

@@ -19,13 +19,23 @@ npm install --save-dev @types/kafkajs
 
 npm install --save-dev typescript ts-node-dev @types/node @types/express
 
+touch .env .dockerignore
+
+cat > .dockerignore <<'EOF'
+node_modules/
+build/
+.env
+EOF
+
 mkdir -p src build
+
+mkdir -p src/kafka src/controller src/route
 
 cat > tsconfig.json <<'EOF'
 {
   "compilerOptions": {
     "target": "es2020",
-    "module": "commonjs",
+    "module": "NodeNext",
     "lib": ["es2020"],
     "allowJs": true,
     "outDir": "build",
@@ -39,14 +49,13 @@ cat > tsconfig.json <<'EOF'
   "include": ["src"],
   "exclude": ["node_modules"]
 }
+
 EOF
 
-# Step 6: Add scripts to package.json
 npx npm pkg set scripts.dev="ts-node-dev --respawn src/index.ts"
 npx npm pkg set scripts.build="tsc"
 npx npm pkg set scripts.start="node build/index.js"
 
-# Step 7: Create entry file
 cat > src/index.ts <<'EOF'
 import express from 'express';
 
@@ -60,11 +69,9 @@ app.get('/', (_req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(\`🚀 $SERVICE_NAME is running on port \${PORT}\`);
+  console.log(`🚀 Server is running on port ${PORT}`);
 });
 EOF
 
 echo "✅ $SERVICE_NAME setup complete."
 echo "👉 Run 'npm run dev' to start developing."
-
-
