@@ -1,17 +1,21 @@
-import { Kafka } from 'kafkajs';
+import { Kafka, Producer } from 'kafkajs';
 
-const kafka = new Kafka({
-  clientId: 'app',
+const kafka: Kafka = new Kafka({
+  clientId: 'order-service-order-created-producer',
   brokers: ['kafka:9092'],
 });
 
-export const producer = kafka.producer();
+export const producer: Producer = kafka.producer();
 
 export async function sendMessage(
   topic: string,
-  messages: { value: string }[],
-) {
-  await producer.connect();
-  await producer.send({ topic, messages });
-  await producer.disconnect();
+  messages: { value: string; key: string }[],
+): Promise<void> {
+  await producer.send({
+    topic,
+    messages: messages.map((msg) => ({
+      value: msg.value,
+      key: msg.key,
+    })),
+  });
 }

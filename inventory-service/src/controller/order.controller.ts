@@ -1,10 +1,30 @@
 import { Request, Response } from 'express';
 import { sendMessage } from '../kafka/producer.js';
 
-export const createOrder = async (req: Request, res: Response) => {
-  // console.log(req.body);
-  const data = req.body;
-  await sendMessage('test-topic', [{ value: JSON.stringify(data) }]);
+interface data {
+  userId: string;
+  orderId: number;
+  orderAmount: number;
+  status: string | 'Pending';
+}
+
+export const createOrder = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  const data: data = req.body;
+
+  if (!data.userId || !data.orderId || !data.orderAmount || !data.status) {
+    res.status(400).send('Missing required fields');
+    return;
+  }
+  const partitionKey = String(data.orderId);
+
+  console.log('Partition Key : ', partitionKey);
+
+  await sendMessage('order.created.v1', [
+    { value: JSON.stringify(data), key: partitionKey },
+  ]);
 
   res.send('Message sent!');
 };

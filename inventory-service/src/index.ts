@@ -1,20 +1,20 @@
-import express from 'express';
+import dotenv from 'dotenv';
+import express, { Application } from 'express';
 import { startConsumer } from './kafka/consumer.js';
+import { producer } from './kafka/producer.js';
 import { createTopics } from './kafka/topic.js';
 import produceRoute from './routes/order.route.js';
 
-const app = express();
+const app: Application = express();
 const PORT = process.env.PORT || 3000;
 
+dotenv.config();
 app.use(express.json());
 
-app.get('/', (_req, res) => {
-  res.send('Kafka microservice running!');
-});
-
-const bootstrap = async () => {
-  await createTopics(['test-topic']);
-  await startConsumer('test-topic');
+const bootstrap = async (): Promise<void> => {
+  await createTopics(['order.created.v1']);
+  await producer.connect();
+  await startConsumer('order.created.v1');
 
   app.use('/', produceRoute);
 
@@ -23,4 +23,4 @@ const bootstrap = async () => {
   });
 };
 
-bootstrap().catch(console.error);
+bootstrap();
