@@ -12,26 +12,23 @@ const pool = new Pool({
 });
 
 const createTableQuery = `
-  CREATE TABLE IF NOT EXISTS ORDER_DB (
-      id SERIAL PRIMARY KEY,
-      userId text(5),
-      orderId integer(3),
-      itemId integer(3),
-      orderAmount integer(5),
-      status text(100),
+  CREATE TABLE IF NOT EXISTS orders (
+    id SERIAL PRIMARY KEY,
+    userId TEXT,
+    orderId INTEGER,
+    itemId INTEGER,
+    orderAmount INTEGER,
+    status TEXT
   );
 `;
 
 pool
   .query(createTableQuery)
-  .then((result) => {
-    console.log('Table created successfully:', result);
+  .then(() => {
+    console.log('✅ Table "orders" created successfully.');
   })
   .catch((err) => {
-    console.error('Error creating table:', err);
-  })
-  .finally(() => {
-    pool.end();
+    console.error('❌ Error creating table:', err.message);
   });
 
 export default pool;

@@ -23,8 +23,10 @@ const bootstrap = async (): Promise<void> => {
     KAFKA_BROKER: process.env.KAFKA_BROKER,
     PORT: process.env.PORT || 3000,
   });
+
   const client = await pool.connect();
   console.log('✅ Connected to PostgreSQL');
+
   client.release();
   await createTopics(['order.created.v1']);
   await producer.connect();
