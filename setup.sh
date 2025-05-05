@@ -13,11 +13,11 @@ echo "📦 Initializing $SERVICE_NAME..."
 
 npm init -y
 
-npm install express kafkajs
+npm install express kafkajs dotenv pg
 
 npm install --save-dev @types/kafkajs
 
-npm install --save-dev typescript ts-node-dev @types/node @types/express
+npm install --save-dev typescript ts-node-dev @types/node @types/express @types/dotenv @types/pg
 
 touch .env .dockerignore
 

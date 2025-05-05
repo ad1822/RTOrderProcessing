@@ -18,16 +18,16 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  kafka-test:
-    image: apache/kafka
-    working_dir: /opt/kafka/bin
-    depends_on:
-      - kafka
-    command: |
-      ./kafka-console-consumer.sh \
-        --topic order.created.v1 \
-        --bootstrap-server kafka:9092 \
-        --from-beginning
+  # kafka-test:
+  #   image: apache/kafka
+  #   working_dir: /opt/kafka/bin
+  #   depends_on:
+  #     - kafka
+  #   command: |
+  #     ./kafka-console-consumer.sh \
+  #       --topic order.created.v1 \
+  #       --bootstrap-server kafka:9092 \
+  #       --from-beginning
 
   order-service:
     build: ./1-order-service/
@@ -56,6 +56,16 @@ services:
       - '5432:5432'
     volumes:
       - order_db_data:/var/lib/postgresql/data
+
+  inventory-service:
+    build: ./2-inventory-service/
+    container_name: inventory
+    ports:
+      - '3001:3001'
+    depends_on:
+      - order-db
+      - kafka
+      - order-service
 
 volumes:
   order_db_data:
