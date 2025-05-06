@@ -5,8 +5,8 @@ import { sendMessage } from '../kafka/producer.js';
 interface OrderData {
   userId: string;
   itemId: number;
+  quantity: number;
   orderId: number;
-  orderAmount: number;
   status: string;
 }
 
@@ -20,7 +20,7 @@ export const createOrder = async (
     !data.userId ||
     data.orderId == null ||
     data.itemId == null ||
-    data.orderAmount == null ||
+    data.quantity == null ||
     !data.status
   ) {
     res.status(400).send('Missing required fields');
@@ -29,7 +29,7 @@ export const createOrder = async (
 
   try {
     const query = `
-      INSERT INTO orders (userId, orderId, itemId, orderAmount, status)
+      INSERT INTO orders (userId, orderId, itemId, quantity, status)
       VALUES ($1, $2, $3, $4, $5)
     `;
 
@@ -37,7 +37,7 @@ export const createOrder = async (
       data.userId,
       data.orderId,
       data.itemId,
-      data.orderAmount,
+      data.quantity,
       data.status,
     ]);
     console.log('✅ Order inserted');
