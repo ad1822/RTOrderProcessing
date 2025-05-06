@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import { startConsumer } from './kafka/consumer.js';
+import { createTopics } from './kafka/topic.js';
 
 dotenv.config();
 
@@ -23,6 +24,8 @@ app.listen(PORT, async () => {
     DB_NAME: process.env.DB_NAME,
     PORT: process.env.PORT || 3001,
   });
+  await createTopics(['inventory.checked.v1']);
+  // await producer.connect();
   await startConsumer();
   console.log(`🚀🚀🚀 Inventory Service is running on port ${PORT}`);
 });

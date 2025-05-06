@@ -58,13 +58,11 @@ export const startConsumer = async (): Promise<void> => {
           if (product.quantity >= quantity) {
             console.log(`Product ${itemId} is available, processing order.`);
 
-            // Update inventory in the database
             await pool.query(
               'UPDATE inventory SET quantity = quantity - $1 WHERE itemId = $2',
               [quantity, itemId],
             );
 
-            // Send Kafka message with updated stock info
             await producer.send({
               topic: 'inventory.checked.v1',
               messages: [

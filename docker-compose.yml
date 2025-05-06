@@ -18,16 +18,16 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  # kafka-test:
-  #   image: apache/kafka
-  #   working_dir: /opt/kafka/bin
-  #   depends_on:
-  #     - kafka
-  #   command: |
-  #     ./kafka-console-consumer.sh \
-  #       --topic order.created.v1 \
-  #       --bootstrap-server kafka:9092 \
-  #       --from-beginning
+  kafka-test:
+    image: apache/kafka
+    working_dir: /opt/kafka/bin
+    depends_on:
+      - kafka
+    command: |
+      ./kafka-console-consumer.sh \
+        --topic inventory.checked.v1 \
+        --bootstrap-server kafka:9092 \
+        --from-beginning
 
   order-service:
     build: ./1-order-service/
