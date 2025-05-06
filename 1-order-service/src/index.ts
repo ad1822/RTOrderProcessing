@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import express, { Application } from 'express';
 import pool from './db.js';
 import { startConsumer } from './kafka/consumer.js';
+import { startInventoryConsumer } from './kafka/inventory-consumer.js';
 import { producer } from './kafka/producer.js';
 import { createTopics } from './kafka/topic.js';
 import produceRoute from './routes/order.route.js';
@@ -13,7 +14,7 @@ dotenv.config();
 app.use(express.json());
 
 const bootstrap = async (): Promise<void> => {
-  console.log('🔧 Environment Variables:');
+  console.log('🔧 Environment Variables from Order:');
   console.log({
     DB_HOST: process.env.DB_HOST,
     DB_PORT: process.env.DB_PORT,
@@ -31,6 +32,7 @@ const bootstrap = async (): Promise<void> => {
   await createTopics(['order.created.v1']);
   await producer.connect();
   await startConsumer('order.created.v1');
+  await startInventoryConsumer();
 
   app.use('/', produceRoute);
 

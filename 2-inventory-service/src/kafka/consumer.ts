@@ -41,19 +41,19 @@ export const startConsumer = async (): Promise<void> => {
 
         const order = JSON.parse(message.value.toString());
 
-        const { itemId, quantity } = order;
-        console.log('Parsed Order:', order);
+        const { itemId, quantity, orderId } = order;
+        // console.log('Parsed Order:', order);
 
         const res = await pool.query(
           'SELECT * FROM inventory WHERE itemId = $1',
           [itemId],
         );
 
-        console.log('RES : ', res);
+        // console.log('RES : ', res);
 
         if (res.rows.length > 0) {
           const product = res.rows[0];
-          console.log('PRODUCT : ', product);
+          // console.log('PRODUCT : ', product);
 
           if (product.quantity >= quantity) {
             console.log(`Product ${itemId} is available, processing order.`);
@@ -70,7 +70,9 @@ export const startConsumer = async (): Promise<void> => {
                   key: String(itemId),
                   value: JSON.stringify({
                     itemId,
+                    orderId: orderId,
                     status: 'available',
+                    quantity: quantity,
                     remaining: product.quantity - quantity,
                   }),
                 },
@@ -79,7 +81,6 @@ export const startConsumer = async (): Promise<void> => {
           } else {
             console.log(`Product ${itemId} is out of stock.`);
 
-            // Send Kafka message without updating inventory
             await producer.send({
               topic: 'inventory.checked.v1',
               messages: [
@@ -88,6 +89,7 @@ export const startConsumer = async (): Promise<void> => {
                   value: JSON.stringify({
                     itemId,
                     status: 'out_of_stock',
+                    quantity: quantity,
                     remaining: product.quantity,
                   }),
                 },

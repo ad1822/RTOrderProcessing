@@ -18,7 +18,7 @@ export async function startConsumer(topic: string): Promise<void> {
       const value = message.value?.toString() ?? 'null';
       const timestamp = message.timestamp;
 
-      console.log(`📨 ${prefix}`);
+      console.log(`Order 📨 ${prefix}`);
       console.log(`   ┣ key: ${key}`);
       console.log(`   ┣ value: ${value}`);
       console.log(`   ┣ timestamp: ${timestamp}`);
