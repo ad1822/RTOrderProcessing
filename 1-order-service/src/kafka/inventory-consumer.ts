@@ -23,6 +23,7 @@ export async function startInventoryConsumer(): Promise<void> {
       if (!value) return;
 
       const { orderId, quantity, status } = JSON.parse(value);
+      console.log('status : ', status);
 
       const newStatus = status === 'available' ? 'fulfilled' : 'rejected';
       await db.query('UPDATE orders SET status = $1 WHERE orderId = $2', [

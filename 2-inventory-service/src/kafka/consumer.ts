@@ -88,6 +88,7 @@ export const startConsumer = async (): Promise<void> => {
                   key: String(itemId),
                   value: JSON.stringify({
                     itemId,
+                    orderId: orderId,
                     status: 'out_of_stock',
                     quantity: quantity,
                     remaining: product.quantity,

@@ -7,7 +7,7 @@ interface OrderData {
   itemId: number;
   quantity: number;
   orderId: number;
-  status: string;
+  status: string | 'Pending';
 }
 
 export const createOrder = async (
@@ -20,8 +20,7 @@ export const createOrder = async (
     !data.userId ||
     data.orderId == null ||
     data.itemId == null ||
-    data.quantity == null ||
-    !data.status
+    data.quantity == null
   ) {
     res.status(400).send('Missing required fields');
     return;
