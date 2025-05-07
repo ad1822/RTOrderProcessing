@@ -1,5 +1,6 @@
 import { Kafka } from 'kafkajs';
 import db from '../db.js';
+import { producer } from './producer.js';
 
 const kafka = new Kafka({
   clientId: 'order-service-inventory-consumer',
@@ -22,7 +23,7 @@ export async function startInventoryConsumer(): Promise<void> {
 
       if (!value) return;
 
-      const { orderId, quantity, status } = JSON.parse(value);
+      const { itemId, orderId, quantity, status } = JSON.parse(value);
       console.log('status : ', status);
 
       const newStatus = status === 'available' ? 'fulfilled' : 'rejected';
@@ -30,6 +31,21 @@ export async function startInventoryConsumer(): Promise<void> {
         newStatus,
         orderId,
       ]);
+
+      await producer.send({
+        topic: 'payment.generated.v1',
+        messages: [
+          {
+            key: String(itemId),
+            value: JSON.stringify({
+              itemId,
+              orderId: orderId,
+              status: status,
+              quantity: quantity,
+            }),
+          },
+        ],
+      });
 
       console.log(`✅ Order ${orderId} updated to status: ${newStatus}`);
     },

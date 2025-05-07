@@ -18,16 +18,16 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  kafka-test:
-    image: apache/kafka
-    working_dir: /opt/kafka/bin
-    depends_on:
-      - kafka
-    command: |
-      ./kafka-console-consumer.sh \
-        --topic inventory.checked.v1 \
-        --bootstrap-server kafka:9092 \
-        --from-beginning
+  # kafka-test:
+  #   image: apache/kafka
+  #   working_dir: /opt/kafka/bin
+  #   depends_on:
+  #     - kafka
+  #   command: |
+  #     ./kafka-console-consumer.sh \
+  #       --topic inventory.checked.v1 \
+  #       --bootstrap-server kafka:9092 \
+  #       --from-beginning
 
   order-service:
     build: ./1-order-service/
@@ -98,6 +98,26 @@ services:
     volumes:
       - inventory_db_data:/var/lib/postgresql/data
       - ./2-inventory-service/init-inventory.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  payment-service:
+    build: ./3-payment-service/
+    container_name: payment
+    ports:
+      - '3002:3002'
+    # environment:
+    #   DB_HOST: inventory-db
+    #   DB_USER: inventoryuser
+    #   DB_PASS: inventorypass
+    #   DB_NAME: inventories
+    #   DB_PORT: 5432
+    #   PORT: 3001
+    depends_on:
+      - order-db
+      - inventory-db
+      - kafka
+      - zookeeper
+      - order-service
+      - inventory-service
 
 volumes:
   order_db_data:
