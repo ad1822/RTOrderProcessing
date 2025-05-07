@@ -23,7 +23,7 @@ export async function startInventoryConsumer(): Promise<void> {
 
       if (!value) return;
 
-      const { itemId, orderId, quantity, status } = JSON.parse(value);
+      const { userId, itemId, orderId, quantity, status } = JSON.parse(value);
       console.log('status : ', status);
 
       const newStatus = status === 'available' ? 'fulfilled' : 'rejected';
@@ -38,7 +38,8 @@ export async function startInventoryConsumer(): Promise<void> {
           {
             key: String(itemId),
             value: JSON.stringify({
-              itemId,
+              userId: userId,
+              itemId: itemId,
               orderId: orderId,
               status: status,
               quantity: quantity,

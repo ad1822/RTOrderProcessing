@@ -4,7 +4,7 @@ import { Pool } from 'pg';
 
 dotenv.config();
 
-const kafka = new Kafka({
+const kafka: Kafka = new Kafka({
   clientId: 'inventory-service',
   brokers: ['kafka:9092'],
 });
@@ -41,15 +41,15 @@ export const startConsumer = async (): Promise<void> => {
 
         const order = JSON.parse(message.value.toString());
 
-        const { itemId, quantity, orderId } = order;
-        // console.log('Parsed Order:', order);
+        const { userId, itemId, quantity, orderId } = order;
+        console.log('Parsed Order in INVENTORY :', order);
 
         const res = await pool.query(
           'SELECT * FROM inventory WHERE itemId = $1',
           [itemId],
         );
 
-        // console.log('RES : ', res);
+        console.log('RES INVENTORY : ', res);
 
         if (res.rows.length > 0) {
           const product = res.rows[0];
@@ -69,7 +69,8 @@ export const startConsumer = async (): Promise<void> => {
                 {
                   key: String(itemId),
                   value: JSON.stringify({
-                    itemId,
+                    userId: userId,
+                    itemId: itemId,
                     orderId: orderId,
                     status: 'available',
                     quantity: quantity,
@@ -87,7 +88,8 @@ export const startConsumer = async (): Promise<void> => {
                 {
                   key: String(itemId),
                   value: JSON.stringify({
-                    itemId,
+                    userId: userId,
+                    itemId: itemId,
                     orderId: orderId,
                     status: 'out_of_stock',
                     quantity: quantity,
