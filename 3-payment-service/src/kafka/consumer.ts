@@ -10,6 +10,14 @@ const kafka: Kafka = new Kafka({
 
 export const consumer: Consumer = kafka.consumer({ groupId: 'test-group' });
 
+interface data {
+  userId: string;
+  itemId: number;
+  orderId: number;
+  quantity: number;
+  status: string;
+}
+
 const pool = new Pool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -35,10 +43,10 @@ export async function startConsumer(topic: string): Promise<void> {
       console.log(`   ┣ value: ${value}`);
       console.log(`   ┣ timestamp: ${timestamp}`);
       console.log(`   ┗ headers: ${JSON.stringify(message.headers)}`);
-
+      let payload: any;
       try {
         console.log('PAYMENT MESSAGE : ', value);
-        const payload = JSON.parse(value);
+        payload = JSON.parse(value);
 
         console.log('PAYLOAD IN PAYMENT : ', payload);
 
@@ -54,6 +62,21 @@ export async function startConsumer(topic: string): Promise<void> {
 
         const res = await pool.query(query, values);
         console.log('RES : ', res.rowCount);
+        // await producer.send({
+        //   topic: 'order.payment.updated.v2',
+        //   messages: [
+        //     {
+        //       key: String(payload.itemId),
+        //       value: JSON.stringify({
+        //         userId: payload.userId,
+        //         itemId: payload.itemId,
+        //         orderId: payload.orderId,
+        //         quantity: payload.quantity,
+        //         status: 'PAID',
+        //       }),
+        //     },
+        //   ],
+        // });
       } catch (err) {
         console.log('ERROR : ', err);
       }

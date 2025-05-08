@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import express, { Application } from 'express';
 import pool from './db.js';
+import { startConsumer } from './kafka/consumer.js';
 import { startInventoryConsumer } from './kafka/inventory-consumer.js';
 import { producer } from './kafka/producer.js';
 import { createTopics } from './kafka/topic.js';
@@ -32,6 +33,7 @@ const bootstrap = async (): Promise<void> => {
   await producer.connect();
   // await startConsumer('order.created.v1');
   await startInventoryConsumer();
+  await startConsumer('payment.generated.v1');
 
   app.use('/', produceRoute);
 

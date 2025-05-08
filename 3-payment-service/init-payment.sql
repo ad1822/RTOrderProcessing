@@ -7,5 +7,5 @@ CREATE TABLE IF NOT EXISTS payment (
   status TEXT
 );
 
-INSERT INTO payment (userId, itemId, orderId, quantity, status) VALUES
-("AAAA", 100, 100, 100, 'PENDING');
+-- INSERT INTO payment (userId, itemId, orderId, quantity, status) VALUES
+-- ("AAAA", 100, 100, 100, 'PENDING');

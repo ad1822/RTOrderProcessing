@@ -18,17 +18,6 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  # kafka-test:
-  #   image: apache/kafka
-  #   working_dir: /opt/kafka/bin
-  #   depends_on:
-  #     - kafka
-  #   command: |
-  #     ./kafka-console-consumer.sh \
-  #       --topic inventory.checked.v1 \
-  #       --bootstrap-server kafka:9092 \
-  #       --from-beginning
-
   order-db:
     image: postgres:14
     container_name: order-database
@@ -40,6 +29,7 @@ services:
       - '5432:5432'
     volumes:
       - order_db_data:/var/lib/postgresql/data
+
   order-service:
     build: ./1-order-service/
     container_name: order
@@ -55,18 +45,6 @@ services:
     depends_on:
       - order-db
       - kafka
-
-  # product-db:
-  #   image: postgres:14
-  #   container_name: product-database
-  #   environment:
-  #     POSTGRES_USER: productuser
-  #     POSTGRES_PASSWORD: productpass
-  #     POSTGRES_DB: products
-  #   ports:
-  #     - '5432:5432'
-  #   volumes:
-  #     - product_db_data:/var/lib/postgresql/data
 
   inventory-db:
     image: postgres:14
@@ -130,6 +108,28 @@ services:
       - inventory-db
       - order-service
       - inventory-service
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - '8080:8080'
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local-kafka
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    ports:
+      - '9999:8080'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    # environment:
+    # DOZZLE_FILTER: 'order,inventory,payment'
 
 volumes:
   order_db_data:
