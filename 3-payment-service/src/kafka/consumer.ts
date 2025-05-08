@@ -9,15 +9,9 @@ const kafka: Kafka = new Kafka({
   brokers: ['kafka:9092'],
 });
 
-export const consumer: Consumer = kafka.consumer({ groupId: 'test-group' });
-
-interface data {
-  userId: string;
-  itemId: number;
-  orderId: number;
-  quantity: number;
-  status: string;
-}
+export const consumer: Consumer = kafka.consumer({
+  groupId: 'payment-consumer',
+});
 
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -29,7 +23,7 @@ const pool = new Pool({
 
 export async function startConsumer(topic: string): Promise<void> {
   await consumer.connect();
-  await consumer.subscribe({ topic, fromBeginning: true });
+  await consumer.subscribe({ topic, fromBeginning: false });
 
   await consumer.run({
     eachMessage: async ({ topic, partition, message }) => {
@@ -60,7 +54,7 @@ export async function startConsumer(topic: string): Promise<void> {
           payload.status,
         ];
 
-        const res = await pool.query(query, values);
+        await pool.query(query, values);
         // console.log('RES : ', res.rowCount);
         await producer.send({
           topic: 'order.payment.updated.v1',

@@ -24,7 +24,7 @@ export const startConsumer = async (): Promise<void> => {
   await consumer.connect();
   await producer.connect();
 
-  await consumer.subscribe({ topic: 'order.created.v1', fromBeginning: true });
+  await consumer.subscribe({ topic: 'order.created.v1', fromBeginning: false });
 
   await consumer.run({
     eachMessage: async ({ topic, partition, message }) => {
@@ -50,11 +50,8 @@ export const startConsumer = async (): Promise<void> => {
 
         if (res.rows.length > 0) {
           const product = res.rows[0];
-          // console.log('PRODUCT : ', product);
 
           if (product.quantity >= quantity) {
-            // console.log(`Product ${itemId} is available, processing order.`);
-
             await pool.query(
               'UPDATE inventory SET quantity = quantity - $1 WHERE itemId = $2',
               [quantity, itemId],
@@ -71,14 +68,11 @@ export const startConsumer = async (): Promise<void> => {
                     orderId: orderId,
                     status: 'available',
                     quantity: quantity,
-                    remaining: product.quantity - quantity,
                   }),
                 },
               ],
             });
           } else {
-            // console.log(`Product ${itemId} is out of stock.`);
-
             await producer.send({
               topic: 'inventory.checked.v1',
               messages: [
@@ -90,14 +84,13 @@ export const startConsumer = async (): Promise<void> => {
                     orderId: orderId,
                     status: 'out_of_stock',
                     quantity: quantity,
-                    remaining: product.quantity,
                   }),
                 },
               ],
             });
           }
         } else {
-          // console.log(`Product with itemId ${itemId} not found.`);
+          console.log(`Product with itemId ${itemId} not found.`);
         }
       } catch (err) {
         console.error('❌ Failed to process message:', err);
