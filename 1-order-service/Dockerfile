@@ -1,15 +1,27 @@
+#! Install dependencies and build
+FROM node:23-alpine AS build
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+
+RUN npm ci
+
+COPY . .
+
+RUN npm run build
+
+#! Production Stage
 FROM node:23-alpine
 
 WORKDIR /app
 
-COPY package.json .
+COPY --from=build /app/package.json .
+COPY --from=build /app/package-lock.json .
+COPY --from=build /app/build ./build
 
-RUN npm install
-
-COPY . .
+RUN npm ci --omit=dev
 
 EXPOSE 3000
 
-RUN npm run build
-
-CMD ["node", "build/index.js"]
+CMD ["npm", "start"]
