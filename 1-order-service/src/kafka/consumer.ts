@@ -1,11 +1,14 @@
 import { Consumer, Kafka } from 'kafkajs';
+import pool from '../db.js';
 
 const kafka: Kafka = new Kafka({
   clientId: 'order-service-order-created-consumer',
   brokers: ['kafka:9092'],
 });
 
-export const consumer: Consumer = kafka.consumer({ groupId: 'test-group' });
+export const consumer: Consumer = kafka.consumer({
+  groupId: 'order-payment-updated-group',
+});
 
 export async function startConsumer(topic: string): Promise<void> {
   await consumer.connect();
@@ -18,11 +21,22 @@ export async function startConsumer(topic: string): Promise<void> {
       const value = message.value?.toString() ?? 'null';
       const timestamp = message.timestamp;
 
-      console.log(`Order 📨 ${prefix}`);
+      console.log(`ORDER PAYMENT UPDATED 📨 ${prefix}`);
       console.log(`   ┣ key: ${key}`);
       console.log(`   ┣ value: ${value}`);
       console.log(`   ┣ timestamp: ${timestamp}`);
       console.log(`   ┗ headers: ${JSON.stringify(message.headers)}`);
+
+      try {
+        const data = JSON.parse(value);
+        console.log('Parsed DATA :', data);
+
+        const query = 'UPDATE "orders" SET status = $1 WHERE orderId = $2';
+
+        await pool.query(query, [data.status, data.orderId]);
+      } catch (err) {
+        console.error('❌ Failed to process message:', err);
+      }
     },
   });
 }

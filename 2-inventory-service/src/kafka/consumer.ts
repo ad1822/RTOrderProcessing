@@ -29,7 +29,7 @@ export const startConsumer = async (): Promise<void> => {
   await consumer.run({
     eachMessage: async ({ topic, partition, message }) => {
       const prefix = `[${topic} | partition: ${partition} | offset: ${message.offset}]`;
-      console.log(`📨 ${prefix}`);
+      console.log(`INVENTORY (ORDER -> INVENTORY)📨 ${prefix}`);
       console.log(`   ┣ key: ${message.key?.toString() ?? 'null'}`);
       console.log(`   ┣ value: ${message.value?.toString() ?? 'null'}`);
       console.log(`   ┣ timestamp: ${message.timestamp}`);

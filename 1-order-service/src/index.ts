@@ -33,7 +33,7 @@ const bootstrap = async (): Promise<void> => {
   await producer.connect();
   // await startConsumer('order.created.v1');
   await startInventoryConsumer();
-  await startConsumer('payment.generated.v1');
+  await startConsumer('order.payment.updated.v1');
 
   app.use('/', produceRoute);
 

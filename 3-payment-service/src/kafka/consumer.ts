@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import { Consumer, Kafka } from 'kafkajs';
 import { Pool } from 'pg';
+import { producer } from './producer';
 dotenv.config();
 
 const kafka: Kafka = new Kafka({
@@ -62,21 +63,21 @@ export async function startConsumer(topic: string): Promise<void> {
 
         const res = await pool.query(query, values);
         console.log('RES : ', res.rowCount);
-        // await producer.send({
-        //   topic: 'order.payment.updated.v2',
-        //   messages: [
-        //     {
-        //       key: String(payload.itemId),
-        //       value: JSON.stringify({
-        //         userId: payload.userId,
-        //         itemId: payload.itemId,
-        //         orderId: payload.orderId,
-        //         quantity: payload.quantity,
-        //         status: 'PAID',
-        //       }),
-        //     },
-        //   ],
-        // });
+        await producer.send({
+          topic: 'order.payment.updated.v1',
+          messages: [
+            {
+              key: String(payload.itemId),
+              value: JSON.stringify({
+                userId: payload.userId,
+                itemId: payload.itemId,
+                orderId: payload.orderId,
+                quantity: payload.quantity,
+                status: 'PAID',
+              }),
+            },
+          ],
+        });
       } catch (err) {
         console.log('ERROR : ', err);
       }
