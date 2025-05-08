@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import express from 'express';
+import pool from './db.js';
 import { startConsumer } from './kafka/consumer.js';
 import { createTopics } from './kafka/topic.js';
 
@@ -16,7 +17,11 @@ app.get('/', (_req, res) => {
 
 app.listen(PORT, async () => {
   await createTopics(['inventory.checked.v1']);
-
   await startConsumer();
+  const client = await pool.connect();
+  console.log('✅Inventory Connected to PostgreSQL ');
+
+  client.release();
+
   console.log(`🚀🚀 Inventory Service is running on port ${PORT}`);
 });
