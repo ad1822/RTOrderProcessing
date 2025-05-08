@@ -28,7 +28,6 @@ const pool = new Pool({
 });
 
 export async function startConsumer(topic: string): Promise<void> {
-  console.log('PAYMENT ENV : ', pool);
   await consumer.connect();
   await consumer.subscribe({ topic, fromBeginning: true });
 
@@ -39,17 +38,17 @@ export async function startConsumer(topic: string): Promise<void> {
       const value = message.value?.toString() ?? 'null';
       const timestamp = message.timestamp;
 
-      console.log(`Payment 📨 ${prefix}`);
-      console.log(`   ┣ key: ${key}`);
-      console.log(`   ┣ value: ${value}`);
-      console.log(`   ┣ timestamp: ${timestamp}`);
-      console.log(`   ┗ headers: ${JSON.stringify(message.headers)}`);
+      // console.log(`Payment 📨 ${prefix}`);
+      // console.log(`   ┣ key: ${key}`);
+      // console.log(`   ┣ value: ${value}`);
+      // console.log(`   ┣ timestamp: ${timestamp}`);
+      // console.log(`   ┗ headers: ${JSON.stringify(message.headers)}`);
       let payload: any;
       try {
-        console.log('PAYMENT MESSAGE : ', value);
+        // console.log('PAYMENT MESSAGE : ', value);
         payload = JSON.parse(value);
 
-        console.log('PAYLOAD IN PAYMENT : ', payload);
+        // console.log('PAYLOAD IN PAYMENT : ', payload);
 
         const query =
           'INSERT INTO payment (userId, itemId, orderId, quantity, status) VALUES ($1, $2, $3, $4, $5)';
@@ -62,7 +61,7 @@ export async function startConsumer(topic: string): Promise<void> {
         ];
 
         const res = await pool.query(query, values);
-        console.log('RES : ', res.rowCount);
+        // console.log('RES : ', res.rowCount);
         await producer.send({
           topic: 'order.payment.updated.v1',
           messages: [

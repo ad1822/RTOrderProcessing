@@ -19,12 +19,10 @@ export async function startInventoryConsumer(): Promise<void> {
   await consumer.run({
     eachMessage: async ({ topic, partition, message }) => {
       const value = message.value?.toString();
-      console.log('VALUE : ', value);
 
       if (!value) return;
 
       const { userId, itemId, orderId, quantity, status } = JSON.parse(value);
-      console.log('status : ', status);
 
       const newStatus = status === 'available' ? 'fulfilled' : 'rejected';
       await db.query('UPDATE orders SET status = $1 WHERE orderId = $2', [

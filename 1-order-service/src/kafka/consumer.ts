@@ -29,7 +29,6 @@ export async function startConsumer(topic: string): Promise<void> {
 
       try {
         const data = JSON.parse(value);
-        console.log('Parsed DATA :', data);
 
         const query = 'UPDATE "orders" SET status = $1 WHERE orderId = $2';
 

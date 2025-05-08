@@ -29,11 +29,11 @@ export const startConsumer = async (): Promise<void> => {
   await consumer.run({
     eachMessage: async ({ topic, partition, message }) => {
       const prefix = `[${topic} | partition: ${partition} | offset: ${message.offset}]`;
-      console.log(`INVENTORY (ORDER -> INVENTORY)📨 ${prefix}`);
-      console.log(`   ┣ key: ${message.key?.toString() ?? 'null'}`);
-      console.log(`   ┣ value: ${message.value?.toString() ?? 'null'}`);
-      console.log(`   ┣ timestamp: ${message.timestamp}`);
-      console.log(`   ┗ headers: ${JSON.stringify(message.headers)}`);
+      // console.log(`INVENTORY (ORDER -> INVENTORY)📨 ${prefix}`);
+      // console.log(`   ┣ key: ${message.key?.toString() ?? 'null'}`);
+      // console.log(`   ┣ value: ${message.value?.toString() ?? 'null'}`);
+      // console.log(`   ┣ timestamp: ${message.timestamp}`);
+      // console.log(`   ┗ headers: ${JSON.stringify(message.headers)}`);
 
       try {
         if (!message.value)
@@ -42,21 +42,18 @@ export const startConsumer = async (): Promise<void> => {
         const order = JSON.parse(message.value.toString());
 
         const { userId, itemId, quantity, orderId } = order;
-        console.log('Parsed Order in INVENTORY :', order);
 
         const res = await pool.query(
           'SELECT * FROM inventory WHERE itemId = $1',
           [itemId],
         );
 
-        console.log('RES INVENTORY : ', res);
-
         if (res.rows.length > 0) {
           const product = res.rows[0];
           // console.log('PRODUCT : ', product);
 
           if (product.quantity >= quantity) {
-            console.log(`Product ${itemId} is available, processing order.`);
+            // console.log(`Product ${itemId} is available, processing order.`);
 
             await pool.query(
               'UPDATE inventory SET quantity = quantity - $1 WHERE itemId = $2',
@@ -80,7 +77,7 @@ export const startConsumer = async (): Promise<void> => {
               ],
             });
           } else {
-            console.log(`Product ${itemId} is out of stock.`);
+            // console.log(`Product ${itemId} is out of stock.`);
 
             await producer.send({
               topic: 'inventory.checked.v1',
@@ -100,7 +97,7 @@ export const startConsumer = async (): Promise<void> => {
             });
           }
         } else {
-          console.log(`Product with itemId ${itemId} not found.`);
+          // console.log(`Product with itemId ${itemId} not found.`);
         }
       } catch (err) {
         console.error('❌ Failed to process message:', err);

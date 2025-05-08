@@ -16,6 +16,6 @@ export async function createTopics(topics: string[]): Promise<void> {
     })),
   });
 
-  console.log(`✅ Topics created: ${topics.join(', ')}`);
+  // console.log(`✅ Topics created: ${topics.join(', ')}`);
   await admin.disconnect();
 }
