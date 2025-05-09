@@ -149,8 +149,8 @@ services:
       KAFKA_CLUSTERS_0_NAME: local-kafka
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
-    profiles:
-      - manual
+    # profiles:
+    # - manual
 
   dozzle:
     image: amir20/dozzle:latest
@@ -159,8 +159,8 @@ services:
       - '9999:8080'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    profiles:
-      - manual
+    # profiles:
+    # - manual
     # environment:
     # DOZZLE_FILTER: 'order,inventory,payment'
 

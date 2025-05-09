@@ -20,11 +20,12 @@ const pool = new Pool({
   port: parseInt(process.env.DB_PORT || '5432', 10),
 });
 
-export const startConsumer = async (): Promise<void> => {
+export const startConsumer = async (topic: string): Promise<void> => {
+  console.log('✅✅✅✅             ORDER CONSUMER STARTS IN INVENTORY');
   await consumer.connect();
   await producer.connect();
 
-  await consumer.subscribe({ topic: 'order.created.v1', fromBeginning: false });
+  await consumer.subscribe({ topic: topic, fromBeginning: false });
 
   await consumer.run({
     eachMessage: async ({ message }) => {
@@ -74,6 +75,7 @@ export const startConsumer = async (): Promise<void> => {
                   value: JSON.stringify({
                     userId: userId,
                     itemId: itemId,
+                    status: 'Rejected',
                     orderId: orderId,
                     quantity: quantity,
                   }),
@@ -90,5 +92,3 @@ export const startConsumer = async (): Promise<void> => {
     },
   });
 };
-
-startConsumer().catch(console.error);

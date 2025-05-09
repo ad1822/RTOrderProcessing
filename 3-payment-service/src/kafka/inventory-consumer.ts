@@ -8,11 +8,11 @@ const kafka = new Kafka({
 
 const consumer = kafka.consumer({ groupId: 'order-inventory-group' });
 
-export async function startInventoryConsumer(): Promise<void> {
+export async function startInventoryConsumer(topic: string): Promise<void> {
   console.log('PAYMENT INVENTORY CHECKED');
   await consumer.connect();
   await consumer.subscribe({
-    topic: 'inventory.reserved.v1',
+    topic: topic,
     fromBeginning: false,
   });
 

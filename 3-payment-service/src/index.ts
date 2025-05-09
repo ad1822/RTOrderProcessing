@@ -20,7 +20,7 @@ const bootstrap = async (): Promise<void> => {
   await createTopics(['payment.generated.v1']);
   await createTopics(['order.payment.updated.v1']);
   await producer.connect();
-  await startInventoryConsumer();
+  await startInventoryConsumer('inventory.reserved.v1');
   await startConsumer('payment.generated.v1');
 
   app.listen(PORT, () => {

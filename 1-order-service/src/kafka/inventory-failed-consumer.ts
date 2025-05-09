@@ -1,16 +1,17 @@
 import { Consumer, Kafka } from 'kafkajs';
-import pool from '../db.js';
 
 const kafka: Kafka = new Kafka({
-  clientId: 'order-service-payment-consumer',
+  clientId: 'order-inventory-failed-consumer',
   brokers: ['kafka:9092'],
 });
 
 export const consumer: Consumer = kafka.consumer({
-  groupId: 'order-payment-updated-group',
+  groupId: 'order-inventory-failed-group',
 });
 
-export async function startPaymentConsumer(topic: string): Promise<void> {
+export async function startInventoryFailedConsumer(
+  topic: string,
+): Promise<void> {
   await consumer.connect();
   await consumer.subscribe({
     topic: topic,
@@ -23,11 +24,9 @@ export async function startPaymentConsumer(topic: string): Promise<void> {
 
       try {
         const data = JSON.parse(value);
+        console.log(data);
 
-        const query = 'UPDATE "orders" SET status = $1 WHERE orderId = $2';
-
-        await pool.query(query, [data.status, data.orderId]);
-        console.log('✅✅✅✅✅ Operation Complete !!!');
+        console.log('❌❌❌❌ Order Failed Successfully');
       } catch (err) {
         console.error('❌ Failed to process message:', err);
       }
