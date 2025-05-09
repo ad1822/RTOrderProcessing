@@ -34,6 +34,7 @@ export async function startPaymentConsumer(): Promise<void> {
         const query = 'UPDATE "orders" SET status = $1 WHERE orderId = $2';
 
         await pool.query(query, [data.status, data.orderId]);
+        console.log('✅✅✅✅✅ Operation Complete !!!');
       } catch (err) {
         console.error('❌ Failed to process message:', err);
       }

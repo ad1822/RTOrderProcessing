@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import express, { Application } from 'express';
 import pool from './db';
 import { startConsumer } from './kafka/consumer';
+import { startInventoryConsumer } from './kafka/inventory-consumer';
 import { producer } from './kafka/producer';
 import { createTopics } from './kafka/topic';
 
@@ -19,6 +20,7 @@ const bootstrap = async (): Promise<void> => {
   await createTopics(['payment.generated.v1']);
   await createTopics(['order.payment.updated.v1']);
   await producer.connect();
+  await startInventoryConsumer();
   await startConsumer('payment.generated.v1');
 
   app.listen(PORT, () => {
