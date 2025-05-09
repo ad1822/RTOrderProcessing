@@ -1,4 +1,5 @@
 import { Consumer, Kafka } from 'kafkajs';
+import pool from '../db.js';
 
 const kafka: Kafka = new Kafka({
   clientId: 'order-inventory-failed-consumer',
@@ -24,7 +25,11 @@ export async function startInventoryFailedConsumer(
 
       try {
         const data = JSON.parse(value);
-        console.log(data);
+        console.log('DATA : ', data);
+
+        const query = `UPDATE orders SET status = $1 WHERE orderId = $2`;
+
+        pool.query(query, [data.status, data.orderId]);
 
         console.log('❌❌❌❌ Order Failed Successfully');
       } catch (err) {
