@@ -16,7 +16,9 @@ app.get('/', (_req, res) => {
 });
 
 app.listen(PORT, async () => {
-  await createTopics(['inventory.checked.v1']);
+  await createTopics(['inventory.reserved.v1']);
+  await createTopics(['inventory.failed.v1']);
+
   await startConsumer();
   const client = await pool.connect();
   console.log('✅Inventory Connected to PostgreSQL ');

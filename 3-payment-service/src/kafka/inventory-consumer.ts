@@ -12,7 +12,7 @@ export async function startInventoryConsumer(): Promise<void> {
   console.log('PAYMENT INVENTORY CHECKED');
   await consumer.connect();
   await consumer.subscribe({
-    topic: 'inventory.checked.v1',
+    topic: 'inventory.reserved.v1',
     fromBeginning: false,
   });
 
@@ -24,11 +24,7 @@ export async function startInventoryConsumer(): Promise<void> {
 
       const { userId, itemId, orderId, quantity, status } = JSON.parse(value);
 
-      const newStatus = status === 'available' ? 'fulfilled' : 'rejected';
-      // // await db.query('UPDATE orders SET status = $1 WHERE orderId = $2', [
-      // //   newStatus,
-      // //   orderId,
-      // // ]);
+      const newStatus = status === 'Available' ? 'fulfilled' : 'rejected';
 
       await producer.send({
         topic: 'payment.generated.v1',
@@ -39,8 +35,6 @@ export async function startInventoryConsumer(): Promise<void> {
               userId: userId,
               itemId: itemId,
               orderId: orderId,
-              status: status,
-              quantity: quantity,
             }),
           },
         ],

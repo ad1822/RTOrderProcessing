@@ -18,15 +18,8 @@ export async function startPaymentConsumer(): Promise<void> {
   });
 
   await consumer.run({
-    eachMessage: async ({ topic, partition, message }) => {
-      const prefix = `[${topic} | partition: ${partition} | offset: ${message.offset}]`;
+    eachMessage: async ({ message }) => {
       const value = message.value?.toString() ?? 'null';
-
-      // console.log(`ORDER PAYMENT UPDATED 📨 ${prefix}`);
-      // console.log(`   ┣ key: ${key}`);
-      // console.log(`   ┣ value: ${value}`);
-      // console.log(`   ┣ timestamp: ${timestamp}`);
-      // console.log(`   ┗ headers: ${JSON.stringify(message.headers)}`);
 
       try {
         const data = JSON.parse(value);

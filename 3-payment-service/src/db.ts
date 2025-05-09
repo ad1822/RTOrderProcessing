@@ -17,7 +17,6 @@ const createTableQuery = `
     userId TEXT,
     itemId INTEGER,
     orderId INTEGER,
-    quantity INT NOT NULL,
     status TEXT
   );
 `;

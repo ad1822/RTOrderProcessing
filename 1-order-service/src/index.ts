@@ -20,7 +20,6 @@ const bootstrap = async (): Promise<void> => {
   await createTopics(['order.created.v1']);
   await producer.connect();
 
-  // await startInventoryConsumer();
   await startPaymentConsumer();
 
   app.use('/', produceRoute);

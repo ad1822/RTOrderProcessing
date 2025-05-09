@@ -27,14 +27,7 @@ export const startConsumer = async (): Promise<void> => {
   await consumer.subscribe({ topic: 'order.created.v1', fromBeginning: false });
 
   await consumer.run({
-    eachMessage: async ({ topic, partition, message }) => {
-      const prefix = `[${topic} | partition: ${partition} | offset: ${message.offset}]`;
-      // console.log(`INVENTORY (ORDER -> INVENTORY)📨 ${prefix}`);
-      // console.log(`   ┣ key: ${message.key?.toString() ?? 'null'}`);
-      // console.log(`   ┣ value: ${message.value?.toString() ?? 'null'}`);
-      // console.log(`   ┣ timestamp: ${message.timestamp}`);
-      // console.log(`   ┗ headers: ${JSON.stringify(message.headers)}`);
-
+    eachMessage: async ({ message }) => {
       try {
         if (!message.value)
           throw new Error('message.value is null or undefined');
@@ -58,7 +51,7 @@ export const startConsumer = async (): Promise<void> => {
             );
 
             await producer.send({
-              topic: 'inventory.checked.v1',
+              topic: 'inventory.reserved.v1',
               messages: [
                 {
                   key: String(itemId),
@@ -66,7 +59,7 @@ export const startConsumer = async (): Promise<void> => {
                     userId: userId,
                     itemId: itemId,
                     orderId: orderId,
-                    status: 'available',
+                    status: 'Available',
                     quantity: quantity,
                   }),
                 },
@@ -74,7 +67,7 @@ export const startConsumer = async (): Promise<void> => {
             });
           } else {
             await producer.send({
-              topic: 'inventory.checked.v1',
+              topic: 'inventory.failed.v1',
               messages: [
                 {
                   key: String(itemId),
@@ -82,7 +75,6 @@ export const startConsumer = async (): Promise<void> => {
                     userId: userId,
                     itemId: itemId,
                     orderId: orderId,
-                    status: 'out_of_stock',
                     quantity: quantity,
                   }),
                 },

@@ -42,6 +42,7 @@ export const createOrder = async (
     console.log('✅ Order inserted');
 
     const partitionKey = String(data.orderId);
+
     await sendMessage('order.created.v1', [
       { value: JSON.stringify(data), key: partitionKey },
     ]);

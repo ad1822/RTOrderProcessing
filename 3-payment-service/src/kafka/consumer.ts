@@ -41,21 +41,21 @@ export async function startConsumer(topic: string): Promise<void> {
       try {
         // console.log('PAYMENT MESSAGE : ', value);
         payload = JSON.parse(value);
+        payload.status = 'Success';
 
         // console.log('PAYLOAD IN PAYMENT : ', payload);
 
         const query =
-          'INSERT INTO payment (userId, itemId, orderId, quantity, status) VALUES ($1, $2, $3, $4, $5)';
+          'INSERT INTO payment (userId, itemId, orderId, status) VALUES ($1, $2, $3, $4)';
         const values = [
           payload.userId,
           payload.itemId,
           payload.orderId,
-          payload.quantity,
           payload.status,
         ];
 
         await pool.query(query, values);
-        // console.log('RES : ', res.rowCount);
+
         await producer.send({
           topic: 'order.payment.updated.v1',
           messages: [
@@ -65,8 +65,7 @@ export async function startConsumer(topic: string): Promise<void> {
                 userId: payload.userId,
                 itemId: payload.itemId,
                 orderId: payload.orderId,
-                quantity: payload.quantity,
-                status: 'PAID',
+                status: payload.status,
               }),
             },
           ],
