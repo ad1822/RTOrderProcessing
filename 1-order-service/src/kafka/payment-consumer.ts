@@ -27,7 +27,7 @@ export async function startPaymentConsumer(topic: string): Promise<void> {
 
         try {
           const { orderId, status } = JSON.parse(rawValue);
-
+          console.log('✅ Receiving data from  ===> "payment.generated.v1" ');
           const query = 'UPDATE "orders" SET status = $1 WHERE orderId = $2';
           await pool.query(query, [status, orderId]);
 

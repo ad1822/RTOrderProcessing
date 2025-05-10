@@ -48,11 +48,13 @@ export const createOrder = async (
       { value: JSON.stringify(data), key: partitionKey },
     ]);
 
-    console.log('Message Sent to ===> order.created.v1');
+    console.info(
+      '✅ Order Message Sent from API GATEWAY to ===> order.created.v1',
+    );
 
     res.status(201).send('Order created and message sent!');
   } catch (error) {
-    console.error('❌ Failed to create order:', error);
+    console.error('❌ Failed to create order from Order API :', error);
     res.status(500).send('Internal server error');
   }
 };

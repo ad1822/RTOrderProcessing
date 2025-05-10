@@ -28,6 +28,10 @@ export async function startInventoryConsumer(topic: string): Promise<void> {
             JSON.parse(value);
           const newStatus = status === 'Available' ? 'fulfilled' : 'rejected';
 
+          console.log(
+            '✅ Sending data from "inventory.reserved.v1" ===> "payment.generated.v1" ',
+          );
+
           await producer.send({
             topic: 'payment.generated.v1',
             messages: [
@@ -38,9 +42,9 @@ export async function startInventoryConsumer(topic: string): Promise<void> {
             ],
           });
 
-          console.log(
-            `✅ Inventory status received: ${status} → Order ${orderId} marked as '${newStatus}'`,
-          );
+          // console.log(
+          //   `✅ Inventory status received: ${status} → Order ${orderId} marked as '${newStatus}'`,
+          // );
         } catch (err) {
           console.error('💥 Error processing inventory message:', err);
         }

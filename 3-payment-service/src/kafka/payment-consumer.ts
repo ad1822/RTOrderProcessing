@@ -53,7 +53,9 @@ export async function startPaymentConsumer(topic: string): Promise<void> {
           ];
 
           await pool.query(insertQuery, values);
-
+          console.log(
+            '✅ Sending data from "payment.generated.v1" ===> "order.payment.updated.v1" ',
+          );
           await producer.send({
             topic: 'order.payment.updated.v1',
             messages: [

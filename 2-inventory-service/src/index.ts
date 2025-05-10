@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import pool from './db.js';
-import { startConsumer } from './kafka/consumer.js';
+import { startConsumer } from './kafka/order-consumer.js';
 import { createTopics } from './kafka/topic.js';
 
 dotenv.config();

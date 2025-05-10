@@ -58,9 +58,9 @@ export const startConsumer = async (topic: string): Promise<void> => {
               [quantity, itemId],
             );
 
-            console.log(`✅ Inventory updated for itemId ${itemId}.`);
-            console.log(
-              `📤 Sending 'inventory.reserved.v1' for orderId ${orderId}`,
+            console.info(`✅ Inventory updated for itemId ${itemId}.`);
+            console.info(
+              `✅ Sending data to 'order.create.v1' ===> 'inventory.reserved.v1' for orderId ${orderId}`,
             );
 
             await producer.send({
@@ -81,7 +81,7 @@ export const startConsumer = async (topic: string): Promise<void> => {
           } else {
             console.warn(`❌ Insufficient inventory for itemId ${itemId}.`);
             console.log(
-              `📤 Sending 'inventory.failed.v1' for orderId ${orderId}`,
+              `❌ Sending data to 'order.create.v1' ===> 'inventory.failed.v1' for orderId ${orderId}`,
             );
 
             await producer.send({
