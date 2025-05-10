@@ -1,20 +1,25 @@
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.0
+    container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
-    healthcheck:
-      test: nc -z localhost 2181 || exit -1
-      interval: 10s
-      timeout: 5s
-      retries: 3
+      # ZOOKEEPER_TICK_TIME: 2000
+    # healthcheck:
+    #   test: ['CMD-SHELL', 'zkOk 2181 || exit 1']
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 3
 
   kafka:
     image: confluentinc/cp-kafka:7.3.0
+    container_name: kafka
     ports:
       - '9092:9092'
     depends_on:
       - zookeeper
+        # zookeeper:
+        #   condition: service_healthy
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -22,11 +27,20 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    healthcheck:
-      test: kafka-topics --bootstrap-server broker:9092 --list
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    # healthcheck:
+    #   test:
+    #     [
+    #       'CMD-SHELL',
+    #       'kafka-topics --bootstrap-server kafka:9092 --list || exit 1',
+    #     ]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    # volumes:
+    #   - kafka_data:/var/lib/kafka/data
 
   order-db:
     image: postgres:14
@@ -37,18 +51,18 @@ services:
       POSTGRES_DB: orders
     ports:
       - '5432:5432'
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U orderuser -d orders || exit 1']
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
+    # healthcheck:
+    #   test: ['CMD-SHELL', 'pg_isready -U orderuser -d orders || exit 1']
+    #   interval: 5s
+    #   timeout: 5s
+    #   retries: 10
+    #   start_period: 10s
     volumes:
       - order_db_data:/var/lib/postgresql/data
 
   order-service:
     build: ./1-order-service/
-    container_name: order
+    container_name: order-service
     environment:
       DB_HOST: order-db
       DB_USER: orderuser
@@ -56,13 +70,17 @@ services:
       DB_NAME: orders
       DB_PORT: 5432
       PORT: 3000
+      KAFKA_BROKERS: kafka:9092
     ports:
       - '3000:3000'
     depends_on:
-      order-db:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
+      - order-db
+      - kafka
+      # order-db:
+      #   condition: service_healthy
+      # kafka:
+      #   condition: service_healthy
+    restart: always
 
   inventory-db:
     image: postgres:14
@@ -82,11 +100,10 @@ services:
       start_period: 10s
     volumes:
       - inventory_db_data:/var/lib/postgresql/data
-      # - ./2-inventory-service/init-inventory.sql:/docker-entrypoint-initdb.d/init.sql:ro
 
   inventory-service:
     build: ./2-inventory-service/
-    container_name: inventory
+    container_name: inventory-service
     ports:
       - '3001:3001'
     environment:
@@ -96,13 +113,15 @@ services:
       DB_NAME: inventories
       DB_PORT: 5432
       PORT: 3001
+      KAFKA_BROKERS: kafka:9092
     depends_on:
-      kafka:
-        condition: service_healthy
-      order-db:
-        condition: service_healthy
+      # - kafka
+      # - inventory-db
+      # kafka:
+      #   condition: service_healthy
       inventory-db:
         condition: service_healthy
+    restart: always
 
   payment-db:
     image: postgres:14
@@ -113,18 +132,18 @@ services:
       POSTGRES_DB: payments
     ports:
       - '5434:5432'
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U paymentuser -d payments || exit 1']
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
+    # healthcheck:
+    #   test: ['CMD-SHELL', 'pg_isready -U paymentuser -d payments || exit 1']
+    #   interval: 5s
+    #   timeout: 5s
+    #   retries: 10
+    #   start_period: 10s
     volumes:
       - payment_db_data:/var/lib/postgresql/data
 
   payment-service:
     build: ./3-payment-service/
-    container_name: payment
+    container_name: payment-service
     ports:
       - '3002:3002'
     environment:
@@ -134,13 +153,15 @@ services:
       DB_NAME: payments
       DB_PORT: 5432
       PORT: 3002
+      KAFKA_BROKERS: kafka:9092
     depends_on:
-      kafka:
-        condition: service_healthy
-      order-db:
-        condition: service_healthy
-      inventory-db:
-        condition: service_healthy
+      - kafka
+      - payment-db
+        # kafka:
+        #   condition: service_healthy
+        # payment-db:
+        #   condition: service_healthy
+    restart: always
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -153,8 +174,9 @@ services:
       KAFKA_CLUSTERS_0_NAME: local-kafka
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
-    # profiles:
-    # - manual
+    #   KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: connect
+    #   KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
+    # restart: unless-stopped
 
   dozzle:
     image: amir20/dozzle:latest
@@ -163,10 +185,9 @@ services:
       - '9999:8080'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    # profiles:
-    # - manual
-    # environment:
-    # DOZZLE_FILTER: 'order,inventory,payment'
+    environment:
+      DOZZLE_FILTER: 'name=order-service|inventory-service|payment-service'
+    restart: unless-stopped
 
 volumes:
   order_db_data:
