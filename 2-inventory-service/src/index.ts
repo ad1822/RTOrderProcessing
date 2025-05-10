@@ -12,18 +12,26 @@ const PORT = process.env.PORT || 3001;
 app.use(express.json());
 
 app.get('/', (_req, res) => {
-  res.send('Welcome to the service!');
+  res.send('Welcome to the Inventory Service!');
 });
 
-app.listen(PORT, async () => {
-  await createTopics(['inventory.reserved.v1']);
-  await createTopics(['inventory.failed.v1']);
+const bootstrap = async () => {
+  try {
+    //! Connect to PostgreSQL
+    const client = await pool.connect();
+    console.log('🏭 🏭  Inventory DB connected to PostgreSQL');
+    client.release();
 
-  await startConsumer('order.created.v1');
-  const client = await pool.connect();
-  console.log('✅Inventory Connected to PostgreSQL ');
+    await createTopics(['inventory.reserved.v1', 'inventory.failed.v1']);
+    await startConsumer('order.created.v1');
 
-  client.release();
+    app.listen(PORT, () => {
+      console.log(`🏭🚀🚀  Inventory Service is running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to bootstrap Inventory Service:', error);
+    process.exit(1);
+  }
+};
 
-  console.log(`🚀🚀 Inventory Service is running on port ${PORT}`);
-});
+bootstrap();

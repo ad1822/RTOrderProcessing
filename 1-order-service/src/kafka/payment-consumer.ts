@@ -1,7 +1,7 @@
 import { Consumer, Kafka } from 'kafkajs';
 import pool from '../db.js';
 
-const kafka: Kafka = new Kafka({
+const kafka = new Kafka({
   clientId: 'order-service-payment-consumer',
   brokers: ['kafka:9092'],
 });
@@ -11,26 +11,38 @@ export const consumer: Consumer = kafka.consumer({
 });
 
 export async function startPaymentConsumer(topic: string): Promise<void> {
-  await consumer.connect();
-  await consumer.subscribe({
-    topic: topic,
-    fromBeginning: false,
-  });
+  try {
+    console.log(`📦 Starting Order Payment Consumer on topic: ${topic}`);
 
-  await consumer.run({
-    eachMessage: async ({ message }) => {
-      const value = message.value?.toString() ?? 'null';
+    await consumer.connect();
+    await consumer.subscribe({ topic, fromBeginning: false });
 
-      try {
-        const data = JSON.parse(value);
+    await consumer.run({
+      eachMessage: async ({ topic, partition, message }) => {
+        const rawValue = message.value?.toString();
+        if (!rawValue) {
+          console.warn(`⚠️ Empty message received on topic ${topic}`);
+          return;
+        }
 
-        const query = 'UPDATE "orders" SET status = $1 WHERE orderId = $2';
+        try {
+          const { orderId, status } = JSON.parse(rawValue);
 
-        await pool.query(query, [data.status, data.orderId]);
-        console.log('✅✅✅✅✅ Operation Complete !!!');
-      } catch (err) {
-        console.error('❌ Failed to process message:', err);
-      }
-    },
-  });
+          const query = 'UPDATE "orders" SET status = $1 WHERE orderId = $2';
+          await pool.query(query, [status, orderId]);
+
+          console.log(`✅ Order ${orderId} updated to status: ${status}`);
+        } catch (err) {
+          console.error(`❌ Failed to process message on ${topic}`, {
+            partition,
+            offset: message.offset,
+            error: err,
+          });
+        }
+      },
+    });
+  } catch (err) {
+    console.error('💥 Error initializing payment consumer:', err);
+    process.exit(1);
+  }
 }

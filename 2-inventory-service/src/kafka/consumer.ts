@@ -4,7 +4,8 @@ import { Pool } from 'pg';
 
 dotenv.config();
 
-const kafka: Kafka = new Kafka({
+// Kafka setup
+const kafka = new Kafka({
   clientId: 'inventory-service',
   brokers: ['kafka:9092'],
 });
@@ -12,6 +13,7 @@ const kafka: Kafka = new Kafka({
 const consumer = kafka.consumer({ groupId: 'inventory-group' });
 const producer = kafka.producer();
 
+// PostgreSQL setup
 const pool = new Pool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -21,34 +23,44 @@ const pool = new Pool({
 });
 
 export const startConsumer = async (topic: string): Promise<void> => {
-  console.log('✅✅✅✅             ORDER CONSUMER STARTS IN INVENTORY');
-  await consumer.connect();
-  await producer.connect();
+  try {
+    await consumer.connect();
+    await producer.connect();
+    await consumer.subscribe({ topic, fromBeginning: false });
 
-  await consumer.subscribe({ topic: topic, fromBeginning: false });
+    console.log(`📥 Subscribed to topic: ${topic}`);
 
-  await consumer.run({
-    eachMessage: async ({ message }) => {
-      try {
-        if (!message.value)
-          throw new Error('message.value is null or undefined');
+    await consumer.run({
+      eachMessage: async ({ message }) => {
+        try {
+          if (!message.value) {
+            throw new Error('Received message with no value.');
+          }
 
-        const order = JSON.parse(message.value.toString());
+          const order = JSON.parse(message.value.toString());
+          const { userId, itemId, quantity, orderId } = order;
 
-        const { userId, itemId, quantity, orderId } = order;
+          const result = await pool.query(
+            'SELECT * FROM inventory WHERE itemId = $1',
+            [itemId],
+          );
 
-        const res = await pool.query(
-          'SELECT * FROM inventory WHERE itemId = $1',
-          [itemId],
-        );
+          if (result.rows.length === 0) {
+            console.warn(`❗️ Item with ID ${itemId} not found in inventory.`);
+            return;
+          }
 
-        if (res.rows.length > 0) {
-          const product = res.rows[0];
+          const product = result.rows[0];
 
           if (product.quantity >= quantity) {
             await pool.query(
               'UPDATE inventory SET quantity = quantity - $1 WHERE itemId = $2',
               [quantity, itemId],
+            );
+
+            console.log(`✅ Inventory updated for itemId ${itemId}.`);
+            console.log(
+              `📤 Sending 'inventory.reserved.v1' for orderId ${orderId}`,
             );
 
             await producer.send({
@@ -57,38 +69,44 @@ export const startConsumer = async (topic: string): Promise<void> => {
                 {
                   key: String(itemId),
                   value: JSON.stringify({
-                    userId: userId,
-                    itemId: itemId,
-                    orderId: orderId,
+                    userId,
+                    itemId,
+                    orderId,
                     status: 'Available',
-                    quantity: quantity,
+                    quantity,
                   }),
                 },
               ],
             });
           } else {
+            console.warn(`❌ Insufficient inventory for itemId ${itemId}.`);
+            console.log(
+              `📤 Sending 'inventory.failed.v1' for orderId ${orderId}`,
+            );
+
             await producer.send({
               topic: 'inventory.failed.v1',
               messages: [
                 {
                   key: String(itemId),
                   value: JSON.stringify({
-                    userId: userId,
-                    itemId: itemId,
+                    userId,
+                    itemId,
+                    orderId,
                     status: 'Rejected',
-                    orderId: orderId,
-                    quantity: quantity,
+                    quantity,
                   }),
                 },
               ],
             });
           }
-        } else {
-          console.log(`Product with itemId ${itemId} not found.`);
+        } catch (err) {
+          console.error('💥 Error processing message:', err);
         }
-      } catch (err) {
-        console.error('❌ Failed to process message:', err);
-      }
-    },
-  });
+      },
+    });
+  } catch (err) {
+    console.error('💥 Failed to start consumer:', err);
+    process.exit(1);
+  }
 };

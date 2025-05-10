@@ -13,28 +13,38 @@ export const consumer: Consumer = kafka.consumer({
 export async function startInventoryFailedConsumer(
   topic: string,
 ): Promise<void> {
-  await consumer.connect();
-  await consumer.subscribe({
-    topic: topic,
-    fromBeginning: false,
-  });
+  try {
+    console.log(`📦 Starting Inventory Failed Consumer on topic: ${topic}`);
 
-  await consumer.run({
-    eachMessage: async ({ message }) => {
-      const value = message.value?.toString() ?? 'null';
+    await consumer.connect();
+    await consumer.subscribe({ topic, fromBeginning: false });
 
-      try {
-        const data = JSON.parse(value);
-        console.log('DATA : ', data);
+    await consumer.run({
+      eachMessage: async ({ topic, partition, message }) => {
+        const rawValue = message.value?.toString();
+        if (!rawValue) {
+          console.warn(`⚠️ Empty message received on topic ${topic}`);
+          return;
+        }
 
-        const query = `UPDATE orders SET status = $1 WHERE orderId = $2`;
+        try {
+          const { status, orderId } = JSON.parse(rawValue);
 
-        pool.query(query, [data.status, data.orderId]);
+          const query = `UPDATE orders SET status = $1 WHERE orderId = $2`;
+          await pool.query(query, [status, orderId]);
 
-        console.log('❌❌❌❌ Order Failed Successfully');
-      } catch (err) {
-        console.error('❌ Failed to process message:', err);
-      }
-    },
-  });
+          console.log(`❌ Order ${orderId} marked as ${status}`);
+        } catch (err) {
+          console.error(`❌ Error processing message on ${topic}`, {
+            partition,
+            offset: message.offset,
+            error: err,
+          });
+        }
+      },
+    });
+  } catch (err) {
+    console.error('💥 Failed to initialize inventory failed consumer:', err);
+    process.exit(1);
+  }
 }

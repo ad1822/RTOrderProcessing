@@ -39,13 +39,16 @@ export const createOrder = async (
       data.quantity,
       data.status,
     ]);
-    console.log('✅ Order inserted');
+
+    console.log('🐔 Order Created : ', data);
 
     const partitionKey = String(data.orderId);
 
     await sendMessage('order.created.v1', [
       { value: JSON.stringify(data), key: partitionKey },
     ]);
+
+    console.log('Message Sent to ===> order.created.v1');
 
     res.status(201).send('Order created and message sent!');
   } catch (error) {
@@ -54,18 +57,18 @@ export const createOrder = async (
   }
 };
 
-export const listOrders = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  try {
-    const query = `SELECT * FROM orders`;
-    const result = await pool.query(query);
+// export const listOrders = async (
+//   req: Request,
+//   res: Response,
+// ): Promise<void> => {
+//   try {
+//     const query = `SELECT * FROM orders`;
+//     const result = await pool.query(query);
 
-    console.log('✅ Order list fetched');
-    res.status(200).json(result.rows);
-  } catch (error) {
-    console.error('❌ Failed to fetch orders:', error);
-    res.status(500).send('Internal server error');
-  }
-};
+//     console.log('✅ Order list fetched');
+//     res.status(200).json(result.rows);
+//   } catch (error) {
+//     console.error('❌ Failed to fetch orders:', error);
+//     res.status(500).send('Internal server error');
+//   }
+// };
