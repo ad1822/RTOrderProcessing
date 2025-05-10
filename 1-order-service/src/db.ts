@@ -14,8 +14,8 @@ const pool = new Pool({
 const createTableQuery = `
   CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,
-    userId TEXT,
-    orderId INTEGER,
+    userId VARCHAR(10),
+    orderId VARCHAR(10),
     itemId INTEGER,
     quantity INTEGER,
     status TEXT

@@ -1,5 +1,5 @@
 #! Install dependencies and build
-FROM node:23-alpine AS build
+FROM node:24-alpine AS build
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ COPY . .
 RUN npm run build
 
 #! Production Stage
-FROM node:23-alpine
+FROM node:24-alpine
 
 WORKDIR /app
 

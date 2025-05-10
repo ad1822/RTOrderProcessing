@@ -14,9 +14,9 @@ const pool = new Pool({
 const createTableQuery = `
   CREATE TABLE IF NOT EXISTS payment (
     id SERIAL PRIMARY KEY,
-    userId TEXT,
+    userId VARCHAR(10),
     itemId INTEGER,
-    orderId INTEGER,
+    orderId VARCHAR(10),
     status TEXT
   );
 `;

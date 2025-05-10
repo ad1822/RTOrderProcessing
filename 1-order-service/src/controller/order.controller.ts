@@ -6,7 +6,7 @@ interface OrderData {
   userId: string;
   itemId: number;
   quantity: number;
-  orderId: number;
+  orderId: string;
   status: string | 'Pending';
 }
 
@@ -16,16 +16,24 @@ export const createOrder = async (
 ): Promise<void> => {
   const data: OrderData = req.body;
 
-  if (
-    !data.userId ||
-    data.orderId == null ||
-    data.itemId == null ||
-    data.quantity == null
-  ) {
+  if (!data.userId || data.itemId == null || data.quantity == null) {
     res.status(400).send('Missing required fields');
     return;
   }
 
+  function generateRandomString(length: number) {
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
+  data.orderId = generateRandomString(8);
+
+  // Example usage:
   try {
     const query = `
       INSERT INTO orders (userId, orderId, itemId, quantity, status)
