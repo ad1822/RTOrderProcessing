@@ -38,7 +38,7 @@ services:
       - order_db_data:/var/lib/postgresql/data
 
   order-service:
-    image: ayushdumasia/order-service
+    image: ayushdumasia/order-service:f7988a7
     container_name: order-service
     environment:
       DB_HOST: order-db
@@ -75,7 +75,7 @@ services:
       - inventory_db_data:/var/lib/postgresql/data
 
   inventory-service:
-    image: ayushdumasia/inventory-service
+    image: ayushdumasia/inventory-service:f7988a7
     container_name: inventory-service
     ports:
       - '3001:3001'
@@ -104,7 +104,7 @@ services:
       - payment_db_data:/var/lib/postgresql/data
 
   payment-service:
-    image: ayushdumasia/payment-service
+    image: ayushdumasia/payment-service:f7988a7
     container_name: payment-service
     ports:
       - '3002:3002'
