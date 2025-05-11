@@ -6,8 +6,11 @@ on:
     tags: ['v*']
 
 jobs:
-  build:
+  Order_Service_Build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 1-order-service
 
     steps:
       - uses: actions/checkout@v4
@@ -16,8 +19,5 @@ jobs:
         with:
           node-version: '24.x'
       - run: npm ci
-        working-directory: 1-order-service
       - run: npm run build --if-present
-        working-directory: 1-order-service
       - run: cat Dockerfile
-        working-directory: 1-order-service
