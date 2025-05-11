@@ -103,7 +103,7 @@ jobs:
 
       - name: Set environment variables
         run: |
-          echo "IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/${{ vars.IMAGE_NAME_2 }}" >> $GITHUB_ENV
+          echo "IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/${{ vars.IMAGE_NAME_3 }}" >> $GITHUB_ENV
           echo "IMAGE_TAG=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             echo "IMAGE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
