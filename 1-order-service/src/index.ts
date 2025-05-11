@@ -16,6 +16,8 @@ app.use(express.json());
 
 const startServer = async (): Promise<void> => {
   try {
+    console.log('🔧 Environment Variables:', process.env); // <-- Print all envs
+
     //! Connect to PostgreSQL
     const client = await pool.connect();
     console.log('🐔🐔🐔 OrderDB connected to PostgreSQL');

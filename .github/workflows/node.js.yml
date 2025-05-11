@@ -40,6 +40,7 @@ jobs:
           push: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/') }}
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+            ${{ (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/')) && format('{0}:latest', env.IMAGE_NAME) || '' }}
           platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -78,6 +79,7 @@ jobs:
           push: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/') }}
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+            ${{ (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/')) && format('{0}:latest', env.IMAGE_NAME) || '' }}
           platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -116,6 +118,7 @@ jobs:
           push: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/') }}
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+            ${{ (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/')) && format('{0}:latest', env.IMAGE_NAME) || '' }}
           platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
