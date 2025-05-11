@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Docker CI
 
 on:
   push:
@@ -6,22 +6,6 @@ on:
     tags: ['v*']
 
 jobs:
-  # build:
-  #   runs-on: ubuntu-latest
-  #   defaults:
-  #     run:
-  #       working-directory: 1-order-service
-
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Use Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '24.x'
-  #     - run: npm ci
-  #     - run: npm run build --if-present
-  #     - run: cat Dockerfile
-
   order-service-build-and-push:
     # needs: build
     runs-on: ubuntu-latest
@@ -62,7 +46,6 @@ jobs:
           cache-to: type=gha,mode=max
 
   inventory-service-build-and-push:
-    # needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/')
     defaults:
@@ -101,7 +84,6 @@ jobs:
           cache-to: type=gha,mode=max
 
   payment-service-build-and-push:
-    # needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/')
     defaults:
