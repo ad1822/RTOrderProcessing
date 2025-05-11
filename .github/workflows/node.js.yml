@@ -1,4 +1,3 @@
-
 name: Node.js CI
 
 on:
@@ -7,24 +6,24 @@ on:
     tags: ['v*']
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: 1-order-service
+  # build:
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: 1-order-service
 
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24.x'
-      - run: npm ci
-      - run: npm run build --if-present
-      - run: cat Dockerfile
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Use Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '24.x'
+  #     - run: npm ci
+  #     - run: npm run build --if-present
+  #     - run: cat Dockerfile
 
-  build-and-push:
-    needs: build
+  order-service-build-and-push:
+    # needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/')
     defaults:
@@ -62,3 +61,41 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  inventory-service-build-and-push:
+    # needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/')
+    defaults:
+      run:
+        working-directory: 2-inventory-service
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set environment variables
+        run: |
+          echo "IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/${{ vars.IMAGE_NAME_2 }}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            echo "IMAGE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          fi
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./2-inventory-service
+          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/') }}
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
