@@ -25,8 +25,10 @@ jobs:
   build-and-push:
     needs: build
     runs-on: ubuntu-latest
-    working-directory: 1-order-service
     if: github.ref == 'refs/heads/main' || 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/')
+    defaults:
+      run:
+        working-directory: 1-order-service
     steps:
       - uses: actions/checkout@v4
 
