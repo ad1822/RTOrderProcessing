@@ -1,8 +1,9 @@
+
 name: Node.js CI
 
 on:
   push:
-    branches: ['ci', 'dev']
+    branches: ['ci', 'dev', 'main']
     tags: ['v*']
 
 jobs:
@@ -25,10 +26,11 @@ jobs:
   build-and-push:
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/')
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/')
     defaults:
       run:
         working-directory: 1-order-service
+
     steps:
       - uses: actions/checkout@v4
 
@@ -40,6 +42,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
       - name: Set environment variables
         run: |
           echo "IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/${{ vars.IMAGE_NAME_1 }}" >> $GITHUB_ENV
@@ -47,6 +50,7 @@ jobs:
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             echo "IMAGE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
           fi
+
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
@@ -57,3 +61,4 @@ jobs:
           platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
