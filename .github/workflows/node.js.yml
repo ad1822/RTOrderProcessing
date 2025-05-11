@@ -8,7 +8,7 @@ on:
 jobs:
   order-service-build-and-push:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/')
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/')
     defaults:
       run:
         working-directory: 1-order-service
@@ -37,7 +37,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./1-order-service
-          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/') }}
+          push: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/') }}
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           platforms: linux/amd64
@@ -46,7 +46,7 @@ jobs:
 
   inventory-service-build-and-push:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/')
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/')
     defaults:
       run:
         working-directory: 2-inventory-service
@@ -75,7 +75,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./2-inventory-service
-          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/') }}
+          push: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/') }}
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           platforms: linux/amd64
@@ -84,7 +84,7 @@ jobs:
 
   payment-service-build-and-push:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/')
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/')
     defaults:
       run:
         working-directory: 3-payment-service
@@ -113,7 +113,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./3-payment-service
-          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/') }}
+          push: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/') }}
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           platforms: linux/amd64
