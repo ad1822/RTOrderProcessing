@@ -2,12 +2,11 @@ name: Docker CI
 
 on:
   push:
-    branches: ['ci', 'dev', 'main']
+    branches: ['ci', 'dev']
     tags: ['v*']
 
 jobs:
   order-service-build-and-push:
-    # needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci' || startsWith(github.ref, 'refs/tags/')
     defaults:
