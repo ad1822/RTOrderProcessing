@@ -1,9 +1,13 @@
+import dotenv from 'dotenv';
 import { Consumer, Kafka } from 'kafkajs';
 import pool from '../db.js';
+dotenv.config();
 
 const kafka: Kafka = new Kafka({
   clientId: 'order-inventory-failed-consumer',
-  brokers: ['kafka:9092'],
+  brokers: [
+    process.env.KAFKA_BOOTSTRAP_SERVERS || 'kafka.kafka.svc.cluster.local:9092',
+  ],
 });
 
 export const consumer: Consumer = kafka.consumer({

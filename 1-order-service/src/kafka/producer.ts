@@ -1,8 +1,12 @@
+import dotenv from 'dotenv';
 import { Kafka, Producer } from 'kafkajs';
+dotenv.config();
 
 const kafka: Kafka = new Kafka({
   clientId: 'order-service-order-created-producer',
-  brokers: ['kafka:9092'],
+  brokers: [
+    process.env.KAFKA_BOOTSTRAP_SERVERS || 'kafka.kafka.svc.cluster.local:9092',
+  ],
 });
 
 export const producer: Producer = kafka.producer();

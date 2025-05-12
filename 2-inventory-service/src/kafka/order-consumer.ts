@@ -7,7 +7,9 @@ dotenv.config();
 // Kafka setup
 const kafka = new Kafka({
   clientId: 'inventory-service',
-  brokers: ['kafka:9092'],
+  brokers: [
+    process.env.KAFKA_BOOTSTRAP_SERVERS || 'kafka.kafka.svc.cluster.local:9092',
+  ],
 });
 
 const consumer = kafka.consumer({ groupId: 'inventory-group' });

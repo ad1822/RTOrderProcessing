@@ -2,7 +2,9 @@ import { Kafka, Producer } from 'kafkajs';
 
 const kafka: Kafka = new Kafka({
   clientId: 'payment-service-payment-created-producer',
-  brokers: ['kafka:9092'],
+  brokers: [
+    process.env.KAFKA_BOOTSTRAP_SERVERS || 'kafka.kafka.svc.cluster.local:9092',
+  ],
 });
 
 export const producer: Producer = kafka.producer();

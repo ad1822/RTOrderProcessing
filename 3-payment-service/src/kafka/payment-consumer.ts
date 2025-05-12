@@ -7,7 +7,9 @@ dotenv.config();
 
 const kafka = new Kafka({
   clientId: 'payment-service-payment-generated-consumer',
-  brokers: ['kafka:9092'],
+  brokers: [
+    process.env.KAFKA_BOOTSTRAP_SERVERS || 'kafka.kafka.svc.cluster.local:9092',
+  ],
 });
 
 export const consumer: Consumer = kafka.consumer({

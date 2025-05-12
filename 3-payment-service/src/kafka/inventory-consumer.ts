@@ -3,7 +3,9 @@ import { producer } from './producer.js';
 
 const kafka = new Kafka({
   clientId: 'order-service-inventory-consumer',
-  brokers: ['kafka:9092'],
+  brokers: [
+    process.env.KAFKA_BOOTSTRAP_SERVERS || 'kafka.kafka.svc.cluster.local:9092',
+  ],
 });
 
 const consumer = kafka.consumer({ groupId: 'order-inventory-group' });

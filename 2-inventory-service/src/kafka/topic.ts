@@ -2,7 +2,9 @@ import { Admin, Kafka } from 'kafkajs';
 
 const kafka: Kafka = new Kafka({
   clientId: 'inventory-service',
-  brokers: ['kafka:9092'],
+  brokers: [
+    process.env.KAFKA_BOOTSTRAP_SERVERS || 'kafka.kafka.svc.cluster.local:9092',
+  ],
 });
 
 export async function createTopics(topics: string[]): Promise<void> {
